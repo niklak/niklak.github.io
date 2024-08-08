@@ -11,12 +11,13 @@ After some time, I wrote a working server based on this library.
 Then it occurred to me that my library lacked some features, including determining the HTTP protocol version.
 
 After I felt everything was ready, it was time to deploy this server.
+
 For a web server to work over the `HTTP/2.0` protocol, you need **trusted** TLS certificates. Currently, you can create them for free using services like **Let's Encrypt**.
 
 > A slight digression. For the last few years, I haven't particularly kept up with new developments in web servers (and not only them). Before this moment, I had used **nginx** and a couple of times **haproxy**, so **caddy** passed me by. And now a great opportunity came up to fix this situation – I  decided to use **caddy** as a proxy for my server.
 
-Caddy can automatically create certificates and proxy` HTTP/1.1`, `HTTP/2.0`, and `HTTP/3` (and `H2C`) requests. And although this is far from all that caddy is capable of, I am mostly interested in these two points – certificates and proxying.
-From the beginning, I decided to use` docker compose` to run caddy and my service (**httpbulb**) – since both have docker images. 
+Caddy can automatically create certificates and proxy `HTTP/1.1`, `HTTP/2.0`, and `HTTP/3` (and `H2C`) requests. And although this is far from all that caddy is capable of, I am mostly interested in these two points – certificates and proxying.
+From the beginning, I decided to use `docker compose` to run caddy and my service ([httpbulb](https://github.com/niklak/httpbulb)) – since both have docker images. 
 It is possible to expose the server to the internet to create its certificates but I'm going to reuse caddy's certificates for my server backend. This seems to be the simplest way for me.
 
 
@@ -108,7 +109,7 @@ I slightly modified the Caddyfile:
 }
 ```
 
-I restarted and checked again – still not what I needed. If I send a regular `HTTP/1.1` request, my service shows proto `HTTP/2.0` – because caddy still sends requests to the backend over `HTTP/2.0`. **I need a clear match**: if the user-agent sent an `HTTP/1.1` request, then an` HTTP/1.1` request should be sent to the backend as well. The same applies to `HTTP/2.0`.
+I restarted and checked again – still not what I needed. If I send a regular `HTTP/1.1` request, my service shows proto `HTTP/2.0` – because caddy still sends requests to the backend over `HTTP/2.0`. **I need a clear match**: if the user-agent sent an `HTTP/1.1` request, then an  `HTTP/1.1` request should be sent to the backend as well. The same applies to `HTTP/2.0`.
 
 
 After digging through the caddy documentation, I realized that this can be solved using [request matchers](https://caddyserver.com/docs/caddyfile/matchers).
@@ -159,4 +160,5 @@ httpbulb.net:443 {
 ```
 
 After these changes, everything worked – `HTTP/1.1` requests reached the backend as `HTTP/1.1`, and` HTTP/2.0` as `HTTP/2.0`.
+
 In the end, I was satisfied choosing **caddy**. There are some things that I didn't like (*json config*, lack of *rate limit* in the standard build), but they don't affect anything. Caddy is indeed a strong and convenient tool for serving websites and services.
