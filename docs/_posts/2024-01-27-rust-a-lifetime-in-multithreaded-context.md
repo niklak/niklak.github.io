@@ -47,9 +47,8 @@ In this approach, we clone the value of `Dependency.name` into `LongLivingEntity
 
 <iframe src="https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=b3c3ec25d3e55de85ac3f668a1ee3a78" style="width:100%; height:500px;"></iframe>  
 
-
-
-
+   
+   
 Although this is not my case at all, let's consider a situation where it is still advisable to return references to strings in some form - either as `&str` or as a `struct` with a nested `&str` field.
 So, we have a *long-lived structure* that generates many temporary objects during program execution, and these objects are only needed to perform operations on string (string slice -- `&str`) in the future, such as searching by regex. Here, we don't need the actual string; having a reference to the slice (&str) is sufficient. That is, nothing needs to be cloned, and as a result, we can return an object that contains a field with a reference (`&String` or `&str`) to the generating object.
 
